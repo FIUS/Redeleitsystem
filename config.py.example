@@ -3,3 +3,5 @@ SECRET_KEY = "abcdef"                            #
 DEBUG = False                                    # Debug Mode
 UPDATE_INDEX_INTERVAL = 1                        # Time in seconds between requests
 UPDATE_TIME_INTERVAL = 10                        # 
+INIT_ADMIN_USER = "admin"                        # The name of the initial admin
+INIT_ADMIN_PASS = "secret"                       # The password for the initial admin

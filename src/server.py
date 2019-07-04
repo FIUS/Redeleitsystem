@@ -13,11 +13,23 @@ from utils import render_layout
 from models.forms import LoginForm, NewUserForm
 from models.database import User, Statement, Speaker, Topic, Event
 
+def addadmin_internal(admin_real_name, admin_login, admin_pass):
+    admin_hashed_pw = pbkdf2_sha256.encrypt(admin_pass, rounds=200000, salt_size=16)
+    u = User(admin_real_name, admin_login, admin_hashed_pw, ["admin", "user"])
+    db.session.add(u)
+    db.session.commit()
+
+def addadmin_if_not_exists(admin_real_name, admin_login, admin_pass):
+    if len(User.query.filter(User.username == admin_login).all())==0:
+        addadmin_internal(admin_real_name, admin_login, admin_pass)
+
 app = Flask(__name__)
 app.config.from_object(config)
 with app.test_request_context():
     db.init_app(app)
     db.create_all()
+    addadmin_if_not_exists("Default Admin", app.config["INIT_ADMIN_USER"], app.config["INIT_ADMIN_PASS"])
+
     
 migrate = Migrate(app, db)
 manager = Manager(app)
@@ -33,6 +45,8 @@ from modules import admin, speech
 app.register_blueprint(admin.admin, url_prefix="/admin")
 app.register_blueprint(speech.speech, url_prefix="/speech")
 
+
+
 @manager.command
 def addadmin():
     """Add a new administrative user to the system"""
@@ -41,10 +55,7 @@ def addadmin():
     admin_login = prompt("Username")
     admin_pass = prompt_pass("Password")
     if admin_real_name is not None and admin_login is not None and admin_pass is not None:
-        admin_hashed_pw = pbkdf2_sha256.encrypt(admin_pass, rounds=200000, salt_size=16)
-        u = User(admin_real_name, admin_login, admin_hashed_pw, ["admin", "user"])
-        db.session.add(u)
-        db.session.commit()
+        addadmin_internal(admin_real_name, admin_login, admin_pass)
     else:
         print("The provided data was invalid.")
 
