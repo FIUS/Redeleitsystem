@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from flask import Flask, g, current_app, request, session, flash, redirect, url_for, abort, render_template, Response
-from flask.ext.login import login_user, logout_user, login_required, current_user
-from flask.ext.principal import Principal, Identity, AnonymousIdentity, identity_changed, identity_loaded, UserNeed, RoleNeed
-from flask.ext.script import Manager, prompt, prompt_pass
-from flask.ext.migrate import Migrate, MigrateCommand
+from flask_login import login_user, logout_user, login_required, current_user
+from flask_principal import Principal, Identity, AnonymousIdentity, identity_changed, identity_loaded, UserNeed, RoleNeed
+from flask_script import Manager, prompt, prompt_pass
+from flask_migrate import Migrate, MigrateCommand
 from passlib.hash import pbkdf2_sha256
 
 import config
@@ -15,7 +15,10 @@ from models.database import User, Statement, Speaker, Topic, Event
 
 app = Flask(__name__)
 app.config.from_object(config)
-db.init_app(app)
+with app.test_request_context():
+    db.init_app(app)
+    db.create_all()
+    
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)

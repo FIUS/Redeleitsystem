@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, url_for, request, flash, abort, send_file, Response
-from flask.ext.login import login_required
+from flask_login import login_required
 from passlib.hash import pbkdf2_sha256
 
 from datetime import datetime, timedelta
